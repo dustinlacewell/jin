@@ -1,0 +1,16 @@
+#+title: Jin
+
+Jin provides [[https://github.com/google/guice][Google Guice]] integration for your Minecraft Bukkit plugins.
+
+
+Depend on Jin in your own plugin:
+
+#+begin_src text
+com.ldlework.mc:jin:0.0.1-SNAPSHOT
+#+end_src
+
+
+* What's it do?
+
+
+
