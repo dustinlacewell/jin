@@ -3,14 +3,48 @@
 Jin provides [[https://github.com/google/guice][Google Guice]] integration for your Minecraft Bukkit plugins.
 
 
-Depend on Jin in your own plugin:
+* Installing
 
-#+begin_src text
-com.ldlework.mc:jin:0.0.1-SNAPSHOT
+To install Jin as a dependency in your project, use [[https://jitpack.io/][Jitpack]].
+
+** Jitpack With Maven
+
+Add the repository:
+#+begin_src xml
+  <repositories>
+    <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+  </repositories>
 #+end_src
 
+Add the dependency:
+#+begin_src xml
+  <dependency>
+          <groupId>com.github.dustinlacewell</groupId>
+          <artifactId>jin</artifactId>
+          <version>0.0.1-SNAPSHOT</version>
+  </dependency>
+#+end_src
 
-* What's it do?
+** Jitpack With Gradle
+
+Add the repositories:
+#+begin_src js
+  repositories {
+       jcenter()
+       maven { url "https://jitpack.io" }
+  }
+#+end_src
+
+Add the dependency:
+
+#+begin_src js
+  dependencies {
+      implementation 'com.github.dustinlacewell:jin:0.0.1-SNAPSHOT'
+  }
+#+end_src
 
 
 

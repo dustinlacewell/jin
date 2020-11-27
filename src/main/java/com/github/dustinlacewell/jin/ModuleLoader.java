@@ -1,4 +1,4 @@
-package com.ldlework.mc.jin;
+package com.github.dustinlacewell.jin;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;

@@ -1,4 +1,4 @@
-package com.ldlework.mc.jin;
+package com.github.dustinlacewell.jin;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'com.ldlework.mc'
+group = 'com.github.dustinlacewell'
 version = '0.0.1-SNAPSHOT'
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_11
@@ -25,23 +25,12 @@ dependencies {
 
 publishing {
     publications {
-        gpr(MavenPublication) {
-            groupId = 'com.ldlework.mc'
+        maven(MavenPublication) {
+            groupId = 'com.github.dustinlacewell'
             artifactId = 'jin'
             version = "$version"
 
             from components.java
-        }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/dustinlacewell/jin"
-            credentials {
-                username = "dustinlacewell" // System.getenv("GITHUB_ACTOR")
-                password = "a6fec88cb69311a441d6106c0485ee9782b54c2c" // System.getenv("GITHUB_TOKEN")
-            }
         }
     }
 }
