@@ -1,6 +1,6 @@
 #+title: Jin
 
-Jin provides [[https://github.com/google/guice][Google Guice]] integration for your Minecraft Bukkit plugins.
+Jin is a dependency injection framework for Bukkit plugins, built ontop of [[https://github.com/google/guice][Google Guice]].
 
 
 * Installing
@@ -9,7 +9,7 @@ To install Jin as a dependency in your project, use [[https://jitpack.io/][Jitpa
 
 ** Jitpack With Maven
 
-Add the repository:
+Add the Jitpack repository:
 #+begin_src xml
   <repositories>
     <repository>
@@ -19,32 +19,127 @@ Add the repository:
   </repositories>
 #+end_src
 
-Add the dependency:
+Add the Jin dependency:
 #+begin_src xml
   <dependency>
           <groupId>com.github.dustinlacewell</groupId>
           <artifactId>jin</artifactId>
-          <version>0.0.1-SNAPSHOT</version>
+          <version>0.0.1</version>
   </dependency>
 #+end_src
 
 ** Jitpack With Gradle
 
-Add the repositories:
+Add the Jitpack repository:
 #+begin_src js
   repositories {
-       jcenter()
        maven { url "https://jitpack.io" }
   }
 #+end_src
 
-Add the dependency:
+Add the Jin dependency:
 
 #+begin_src js
   dependencies {
-      implementation 'com.github.dustinlacewell:jin:0.0.1-SNAPSHOT'
+      implementation 'com.github.dustinlacewell:jin:0.0.1'
   }
 #+end_src
 
+* What does it do?
 
+Jin provides dependency injection support for Bukkit plugins:
 
+#+begin_src java
+  public class MyPlugin extends JinPlugin {
+
+      @Inject
+      public MyService service;
+
+      public void enabled() {
+          service.doTheThing();
+      }
+  }
+#+end_src
+
+=JinPlugin= is a specialized =JavaPlugin= that will setup a Guice =Injector= for you
+automatically. You can override =enabled= and =disabled= instead of =onEnable= and
+=onDisable= respectively.
+
+Your plugin instance will automatically be injected so feel free to depend on
+whatever thanks to Guice's [[https://github.com/google/guice/wiki/JustInTimeBindings][JIT Bindings]].
+
+** Requesting Instances
+
+You can get instances from =JinPlugin.injector.getInstance=:
+
+#+begin_src java
+  public void enabled() {
+      var myService = this.injector.getInstance(MyService.class);
+      // ...
+  }
+#+end_src
+
+However, field injection is also available:
+
+#+begin_src java
+  public class MyPlugin extends JinPlugin {
+
+      @Inject public MyService service;
+      // ...
+  }
+#+end_src
+
+** Implementing Modules
+For more control over [[https://github.com/google/guice/wiki/Bindings][bindings]], implement your own Guice [[https://github.com/google/guice/wiki/MentalModel#modules-add-things-into-the-map][Modules]].
+
+Any classes extending [[https://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/AbstractModule.html][AbstractModule]] with a default constructor will
+automatically be added to the injector.
+
+*** Manually Loading Modules
+If you'd like to instantiate modules yourself, override =JinPlugin.loadModules=:
+
+#+begin_src java
+  @Override
+  public List<Module> loadModules() {
+      // return your Module instances
+  }
+#+end_src
+
+You'll need to use this for any modules with non-default constructors.
+
+** Implementing Services
+
+"Service" is a catch-all phrase for classes involved in dependency injection.
+
+The easiest way to involve a class in Jin is to annotate its constructor with
+[[https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/Inject.html][@Inject]]:
+
+#+begin_src java
+  public class MyService {
+
+      private final OtherService otherService;
+
+      @Inject
+      public MyService(OtherService otherService) {
+          this.otherService = otherService;
+      }
+  }
+#+end_src
+
+In this example, =OtherService='s constructor would be similarly annotated to
+make it automatically available to =MyService=.
+
+While classes which have default constructors don't need an explicit =@Inject=
+annotation, it is recommended as a best practice.
+
+** Injecting the Plugin
+
+If your services need to inject your =JinPlugin=, make sure to annotate it with
+[[https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/assistedinject/Assisted.html][@Assisted]]:
+
+#+begin_src java
+  @Inject
+  public MyService(@Assisted MyPlugin plugin) {
+      this.plugin = plugin;
+  }
+#+end_src
