@@ -19,7 +19,7 @@ repositories {
 dependencies {
     compileOnly 'com.destroystokyo.paper:paper-api:1.16.4-R0.1-SNAPSHOT'
     api 'com.google.inject:guice:5.0.0-BETA-1'
-    api 'com.google.inject.extensions:guice-assistedinject:4.0'
+    api 'com.google.inject.extensions:guice-assistedinject:5.0.0-BETA-1'
     implementation 'io.github.classgraph:classgraph:4.8.90'
 }
 
