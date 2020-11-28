@@ -18,21 +18,31 @@ public abstract class JinPlugin extends JavaPlugin {
     public void disabled() { }
 
     protected List<Module> loadModules() {
-        var logger = getLogger();
         var loader = new ModuleLoader(this);
-        return loader.loadModules(logger);
+        return loader.loadModules();
     }
 
     @Override
     public final void onEnable() {
-        var modules = this.loadModules();
-        this.injector = Guice.createInjector(modules);
-        this.injector.injectMembers(this);
-        this.enabled();
+        try {
+            var modules = this.loadModules();
+            this.injector = Guice.createInjector(modules);
+            this.enabled();
+        } catch (Exception e) {
+            var log = this.getLogger();
+            log.severe("Unrecoverable error:");
+            log.severe(e.getMessage());
+            log.severe(e.getCause().toString());
+            for (var s : e.getStackTrace()) {
+                log.severe(s.toString());
+            }
+            this.setEnabled(false);
+        }
     }
 
     @Override
     public final void onDisable() {
+        this.injector = null;
         this.disabled();
     }
 }
