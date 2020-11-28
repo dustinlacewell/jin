@@ -24,6 +24,10 @@ dependencies {
     implementation 'io.github.classgraph:classgraph:4.8.90'
 }
 
+compileJava {
+    options.compilerArgs << '-Xlint:unchecked'
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
