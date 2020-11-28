@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -17,17 +16,19 @@ import java.util.stream.Stream;
 
 public class ModuleLoader {
 
-    protected JavaPlugin plugin;
-    protected Logger log;
+    protected JinPlugin plugin;
 
-    public ModuleLoader(JavaPlugin plugin) {
+    public ModuleLoader(JinPlugin plugin) {
         this.plugin = plugin;
-        this.log = this.plugin.getLogger();
+    }
+
+    protected Logger getLog() {
+        return this.plugin.getLogger();
     }
 
     protected void logStackTrace(StackTraceElement[] elements) {
         for (var element : elements) {
-            this.log.severe(element.toString());
+            this.getLog().severe(element.toString());
         }
     }
 
@@ -69,7 +70,14 @@ public class ModuleLoader {
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public List<Module> loadModules(Logger log) {
+    protected void logModules(List<Module> modules) {
+        var log = this.plugin.getLogger();
+        for (var module : modules) {
+            log.info(String.format("Loading module: %s", module.getClass().getName()));
+        }
+    }
+
+    public List<Module> loadModules() {
         var subclass = this.getClass();
         var subpackage = subclass.getPackageName();
         var moduleInfos = this.getModules(subpackage);
@@ -77,6 +85,7 @@ public class ModuleLoader {
         var moduleConstructors = this.getConstructors(moduleClasses);
         var modules = this.getModules(moduleConstructors);
         modules.add(new PluginModule(this.plugin));
+        this.logModules(modules);
         return modules;
     }
 
