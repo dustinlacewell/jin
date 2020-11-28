@@ -3,14 +3,13 @@ package com.github.dustinlacewell.jin;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.Singleton;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 
 
-@Singleton
-public abstract class JinPlugin extends JavaPlugin {
+public abstract class JinPlugin extends JavaPlugin implements Listener {
 
     protected Injector injector;
 
