@@ -3,7 +3,6 @@ package com.github.dustinlacewell.jin;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ClassInfoList;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -32,14 +31,31 @@ public class ModuleLoader {
         }
     }
 
-    protected ClassInfoList getModules(String subpackage) {
+    protected List<Module> getModules(String subpackage) {
         var abstractModuleName = AbstractModule.class.getCanonicalName();
         try (var result = new ClassGraph()
                 .enableClassInfo()
                 .acceptPackages(subpackage)
                 .scan()) {
-            return result.getSubclasses(abstractModuleName);
+            var subclasses = result.getSubclasses(abstractModuleName);
+            var classes = subclasses.loadClasses(Module.class);
+            var moduleConstructors = this.getConstructors(classes);
+            return this.getModules(moduleConstructors);
         }
+    }
+
+    protected Constructor<?> getPluginConstructor(Class<? extends Module> classObj) {
+        var pluginClass = this.plugin.getClass();
+        var constructors = classObj.getConstructors();
+        for (var c : constructors) {
+            if (c.getParameterCount() == 1) {
+                var paramTypes = c.getParameterTypes();
+                if (paramTypes[0] == pluginClass) {
+                    return c;
+                }
+            }
+        }
+        return null;
     }
 
     protected Constructor<?> getDefaultConstructor(Class<? extends Module> classObj) {
@@ -52,21 +68,33 @@ public class ModuleLoader {
         return null;
     }
 
+    protected Constructor<?> getConstructor(Class<? extends Module> classObj) {
+        var pluginConstructor = this.getPluginConstructor(classObj);
+        var defaultConstructor = this.getDefaultConstructor(classObj);
+        return pluginConstructor != null ? pluginConstructor : defaultConstructor;
+    }
+
     protected Stream<? extends Constructor<?>> getConstructors(List<Class<Module>> moduleClasses) {
         return moduleClasses
                 .stream()
-                .map(this::getDefaultConstructor)
+                .map(this::getConstructor)
                 .filter(Objects::nonNull);
     }
 
     protected List<Module> getModules(Stream<? extends Constructor<?>> moduleConstructors) {
         return moduleConstructors.map(c -> {
             try {
-                return (Module) c.newInstance();
+                var paramCount = c.getParameterCount();
+                if (paramCount == 0) {
+                    return (Module) c.newInstance();
+                } else if (paramCount == 1){
+                    return (Module) c.newInstance(this.plugin);
+                }
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 this.logStackTrace(e.getStackTrace());
                 return null;
             }
+            return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
@@ -78,12 +106,9 @@ public class ModuleLoader {
     }
 
     public List<Module> loadModules() {
-        var subclass = this.getClass();
+        var subclass = this.plugin.getClass();
         var subpackage = subclass.getPackageName();
-        var moduleInfos = this.getModules(subpackage);
-        var moduleClasses = moduleInfos.loadClasses(Module.class);
-        var moduleConstructors = this.getConstructors(moduleClasses);
-        var modules = this.getModules(moduleConstructors);
+        var modules = this.getModules(subpackage);
         modules.add(new PluginModule(this.plugin));
         this.logModules(modules);
         return modules;
