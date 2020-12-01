@@ -92,8 +92,9 @@ However, field injection is also available:
 ** Implementing Modules
 For more control over [[https://github.com/google/guice/wiki/Bindings][bindings]], implement your own Guice [[https://github.com/google/guice/wiki/MentalModel#modules-add-things-into-the-map][Modules]].
 
-Any classes extending [[https://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/AbstractModule.html][AbstractModule]] with a default constructor will
-automatically be added to the injector.
+Any classes extending [[https://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/AbstractModule.html][AbstractModule]] with a *default constructor* or constructor
+*accepting your JavaPlugin subclass*, will be automatically instantiated and
+registered with the injector.
 
 *** Manually Loading Modules
 If you'd like to instantiate modules yourself, override =JinPlugin.loadModules=:
@@ -143,3 +144,18 @@ If your services need to inject your =JinPlugin=, make sure to annotate it with
       this.plugin = plugin;
   }
 #+end_src
+
+** Automatically Bound Types
+The following types are automatically bound by =jin.PluginModule=:
+
+- Your plugin class
+- Your plugin logger (=PaperPluginLogger=)
+- Your plugin config (=FileConfiguration=)
+- The Bukkit server (=Server=)
+- The Bukkit scheduler (=BukkitScheduler=)
+- The Bukkit scoreboard manager (=ScoreboardManager=)
+- The Bukkit plugin manager (=PluginManager=)
+
+** Automatically Registered Listeners
+Any class instantiated by the injector that implements =Listener= will
+automatically be registered.
